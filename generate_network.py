@@ -4,7 +4,7 @@ from scipy.misc import imsave
 import sys
 
 class Network():
-    def __init__(self, gamma, omega, L=256, n=50):
+    def __init__(self, gamma, omega, L=28, n=10):
         self.gamma = gamma
         self.omega = omega
         self.L = L
