@@ -41,10 +41,10 @@ class Network():
         """Generate a random direction for fracture to propagate in. For simplicity
         we only will only allow horizontal, vertical or diagonal directions."""
         # Propagation directions
-        directions = [[1.,0.],[0.,1.],[1.,1.]]
+        directions = [[0.,1.],[1.,0.],[1.,1.],[1.,-1.]]
 
         # Return a random direction
-        k = np.random.randint(3)
+        k = np.random.randint(4)
 
         return directions[k]
 
@@ -62,7 +62,7 @@ class Network():
             while True:
                 # Propagate first end until it meets a fracture/boundary
                 i_ += int(v[0])
-                j_ += int(v[1])
+                j_ -= int(v[1])
 
                 if self.grid[i_,j_] == 1:
                     break
@@ -73,7 +73,7 @@ class Network():
             while True:
                 # Propagate opposite end until it meets a fracture/boundary
                 i_ -= int(v[0])
-                j_ -= int(v[1])
+                j_ += int(v[1])
 
                 if self.grid[i_,j_] == 1:
                     break
@@ -86,9 +86,9 @@ class Network():
             while True:
                 # Propagate ends simultaneously until one meets a fracture/boundary
                 i_0 += int(v[0])
-                j_0 += int(v[1])
+                j_0 -= int(v[1])
                 i_1 -= int(v[0])
-                j_1 -= int(v[1])
+                j_1 += int(v[1])
 
                 if self.grid[i_0,j_0] == 1:
                     break
