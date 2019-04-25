@@ -124,7 +124,9 @@ def main():
 
     # Pick gamma from a standard normal
     mu_gamma, sigma_gamma = 0, 1.
-    gamma = np.random.normal(mu_gamma, sigma_gamma, s)
+    #gamma = np.random.normal(mu_gamma, sigma_gamma, s)
+
+    gamma = np.random.uniform(-2., 2., s)
 
     # Pick omega uniformly
     omega = np.random.uniform(0., 1., s)
