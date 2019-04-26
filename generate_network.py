@@ -4,7 +4,7 @@ from scipy.misc import imsave
 import sys, random
 
 class Network():
-    def __init__(self, gamma, omega, L=224, n=50):
+    def __init__(self, gamma, omega, L=52, n=16):
         self.gamma = gamma
         self.omega = omega
         self.L = L
@@ -76,7 +76,7 @@ class Network():
                         break
                     else:
                         self.grid[i_,j_] = 1.
-                        
+
                     if i_counter > 0:
                         i_counter -= 1
                     if j_counter > 0:
