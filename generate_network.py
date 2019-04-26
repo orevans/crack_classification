@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.ndimage.morphology import distance_transform_edt
 from scipy.misc import imsave
-import sys
+import sys, random
 
 class Network():
-    def __init__(self, gamma, omega, L=28, n=10):
+    def __init__(self, gamma, omega, L=224, n=50):
         self.gamma = gamma
         self.omega = omega
         self.L = L
@@ -38,15 +38,17 @@ class Network():
         return grid
 
     def propagation_direction(self):
-        """Generate a random direction for fracture to propagate in. For simplicity
-        we only will only allow horizontal, vertical or diagonal directions."""
-        # Propagation directions
-        directions = [[0.,1.],[1.,0.],[1.,1.],[1.,-1.]]
+        """Generate a random direction for fracture to propagate in."""
+        # Step size
+        step = np.random.randint(5)
 
-        # Return a random direction
-        k = np.random.randint(4)
+        # Pick whether step size is in the vertical or horizontal direction
+        step_direction = np.random.randint(2)
 
-        return directions[k]
+        if step_direction:
+            return [random.choice([-1., 1.])*1., step]
+        else:
+            return[step, random.choice([-1., 1.])*1.]
 
     def propagate_fractures(self, i, j):
         """Propagate fractures according to values of omega:
@@ -54,49 +56,89 @@ class Network():
         if omega = 1, propagate until on of the ends terminates"""
         # Propagate fracture in random direction
         v = self.propagation_direction()
-
         prop = np.random.choice((0,1), p=(self.omega,1. - self.omega))
 
         i_, j_ = i, j
         if prop:
+            hit_boundary = False
             while True:
-                # Propagate first end until it meets a fracture/boundary
-                i_ += int(v[0])
-                j_ -= int(v[1])
-
-                if self.grid[i_,j_] == 1:
+                # Need to break out of double while loop
+                if hit_boundary:
                     break
-                else:
-                    self.grid[i_,j_] = 1
+
+                i_counter, j_counter = abs(int(v[0])), abs(int(v[1]))
+                while (i_counter > 0) or (j_counter > 0):
+                    # Propagate first end until it meets a fracture/boundary
+                    i_ += np.sign(int(v[0]))*(i_counter > 0)
+                    j_ += np.sign(int(v[1]))*(j_counter > 0)
+                    if self.grid[i_,j_] == 1.:
+                        hit_boundary = True
+                        break
+                    else:
+                        self.grid[i_,j_] = 1.
+
+
+
+                    if i_counter > 0:
+                        i_counter -= 1
+                    if j_counter > 0:
+                        j_counter -= 1
 
             i_, j_ = i, j
+            hit_boundary = False
             while True:
-                # Propagate opposite end until it meets a fracture/boundary
-                i_ -= int(v[0])
-                j_ += int(v[1])
-
-                if self.grid[i_,j_] == 1:
+                # Need to break out of double while loop
+                if hit_boundary:
                     break
-                else:
-                    self.grid[i_,j_] = 1
+
+                i_counter, j_counter = abs(int(v[0])), abs(int(v[1]))
+                while (i_counter > 0) or (j_counter > 0):
+                    # Propagate first end until it meets a fracture/boundary
+                    i_ -= np.sign(int(v[0]))*(i_counter > 0)
+                    j_ -= np.sign(int(v[1]))*(j_counter > 0)
+
+                    if self.grid[i_,j_] == 1.:
+                        hit_boundary = True
+                        break
+                    else:
+                        self.grid[i_,j_] = 1.
+
+                    if i_counter > 0:
+                        i_counter -= 1
+                    if j_counter > 0:
+                        j_counter -= 1
 
         else:
             i_0, j_0 = i, j
             i_1, j_1 = i, j
+            hit_boundary = False
             while True:
-                # Propagate ends simultaneously until one meets a fracture/boundary
-                i_0 += int(v[0])
-                j_0 -= int(v[1])
-                i_1 -= int(v[0])
-                j_1 += int(v[1])
+                # Need to break out of double while loop
+                if hit_boundary:
+                    break
 
-                if self.grid[i_0,j_0] == 1:
-                    break
-                elif self.grid[i_1,j_1] == 1:
-                    break
-                else:
-                    self.grid[i_0,j_0] = 1
-                    self.grid[i_1,j_1] = 1
+                i_counter, j_counter = abs(int(v[0])), abs(int(v[1]))
+                while (i_counter > 0) or (j_counter > 0):
+                    # Propagate first end until it meets a fracture/boundary
+                    i_0 += np.sign(int(v[0]))*(i_counter > 0)
+                    j_0 += np.sign(int(v[1]))*(j_counter > 0)
+                    i_1 -= np.sign(int(v[0]))*(i_counter > 0)
+                    j_1 -= np.sign(int(v[1]))*(j_counter > 0)
+
+                    if self.grid[i_0,j_0] == 1.:
+                        hit_boundary = True
+                        break
+                    elif self.grid[i_1,j_1] == 1.:
+                        hit_boundary = True
+                        break
+                    else:
+                        self.grid[i_0,j_0] = 1.
+                        self.grid[i_1,j_1] = 1.
+
+                    if i_counter > 0:
+                        i_counter -= 1
+                    if j_counter > 0:
+                        j_counter -= 1
 
     def generate_network(self):
         """Generate fracture grid and save as a .png image"""
