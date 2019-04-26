@@ -76,9 +76,7 @@ class Network():
                         break
                     else:
                         self.grid[i_,j_] = 1.
-
-
-
+                        
                     if i_counter > 0:
                         i_counter -= 1
                     if j_counter > 0:
@@ -160,6 +158,17 @@ class Network():
         imsave('images/gamma_{}_omega_{}.png'.format(self.gamma,self.omega),
              1. - self.grid)
 
+def progress_bar(iteration, total, prefix = '', suffix = '',
+                decimals = 1, length = 100, fill = '█'):
+    """Print progress bar"""
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+
 def main():
     # Number of sample
     s = int(sys.argv[1])
@@ -174,9 +183,9 @@ def main():
     omega = np.random.uniform(0., 1., s)
 
     for k in range(s):
-        print(k)
         cracks = Network(gamma[k],omega[k])
         cracks.generate_network()
+        progress_bar(k,s)
 
 if __name__=="__main__":
     main()
