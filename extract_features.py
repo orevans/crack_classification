@@ -16,7 +16,7 @@ from autoencoder import read_images
 
 def main():
     # Load model
-    model = load_model('autoencoder_epochs_400.h5')
+    model = load_model('models/autoencoder_epochs_400.h5')
 
     # Create new model that outputs at the encoder layer
     model = Model(model.inputs, model.layers[6].output)
@@ -37,6 +37,9 @@ def main():
     omega = np.asarray(omega).reshape(-1, 1)
     gamma = np.asarray(gamma).reshape(-1, 1)
 
+    # Try lumping gamma and omega together
+    params = np.concatenate((gamma, omega), axis=1)
+
     # K-means clustering
     #n_clusters = 15
     #_clusters = k_means(encoder, n_clusters)
@@ -51,24 +54,25 @@ def main():
     #plt.show()
 
     # Try PCA
-    _pca = PCA(n_components=2)
+    n_components = 40
+    _pca = PCA(n_components=n_components)
     _pca.fit(encoder.transpose())
     print(_pca.explained_variance_ratio_)
 
     # Plot PCA components vs. parameters
-    comp  = _pca.components_[0,:].reshape(-1, 1)
-
-    for i in range(2):
+    for i in range(n_components):
         comp = _pca.components_[i,:].reshape(-1, 1)
-        regr = LinearRegression().fit(omega,comp)
-        print(regr.score(gamma,comp))
-        print(pearsonr(gamma,comp))
+        regr = LinearRegression().fit(params,comp)
 
-    #fig, ax = plt.subplots()
-    #ax.scatter(omega,comp,alpha=0.05)
-    #ax.set_ylim(comp.min(),comp.max())
-    #ax.grid(True)
-    #plt.show()
+        # Calculate R^2 score and Pearson coefficient
+        print(regr.score(params,comp), pearsonr(omega,comp), pearsonr(gamma,comp))
+
+    fig, ax = plt.subplots()
+    comp = _pca.components_[3,:].reshape(-1, 1)
+    ax.scatter(gamma,comp,alpha=0.05)
+    ax.set_ylim(comp.min(),comp.max())
+    ax.grid(True)
+    plt.show()
 
 
 

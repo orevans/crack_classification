@@ -31,35 +31,7 @@ def main():
 
     input_img = Input(shape=(L, L, 1))  # adapt this if using `channels_first` image data format
 
-    #x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
-    #x = MaxPooling2D((2, 2), padding='same')(x)
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    #x = MaxPooling2D((2, 2), padding='same')(x)
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    #x = MaxPooling2D((2, 2), padding='same')(x)
-    #x = Conv2D(16, (3, 3), activation='relu', padding='same')(x)
-    #x = MaxPooling2D((2, 2), padding='same')(x)
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    #x = MaxPooling2D((2, 2), padding='same')(x)
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    #encoded = MaxPooling2D((2, 2), padding='same')(x)
-
-    # at this point the representation is (4, 4, 8) i.e. 128-dimensional
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
-    #x = UpSampling2D((2, 2))(x)
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    #x = UpSampling2D((2, 2))(x)
-    #x = Conv2D(16, (3, 3), activation='relu')(x)
-    #x = UpSampling2D((2, 2))(x)
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    #x = UpSampling2D((2, 2))(x)
-    #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    #x = UpSampling2D((2, 2))(x)
-    #x = Conv2D(16, (3, 3), activation='relu', padding='same')(x)
-    #x = UpSampling2D((2, 2))(x)
-    #decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
-
-    x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
+    x = Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
     x = MaxPooling2D((2, 2), padding='same')(x)
     x = Conv2D(16, (3, 3), activation='relu', padding='same')(x)
     x = MaxPooling2D((2, 2), padding='same')(x)
@@ -75,14 +47,11 @@ def main():
     x = UpSampling2D((2, 2))(x)
     x = Conv2D(16, (3, 3), activation='relu')(x)
     x = UpSampling2D((2, 2))(x)
-    x = Conv2D(16, (3, 3), activation='relu')(x)
+    x = Conv2D(32, (3, 3), activation='relu')(x)
     x = UpSampling2D((2, 2))(x)
     decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
-    autoencoder = Model(input_img, decoded)
-    print(autoencoder.summary())
-    #autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-    #opt = SGD(lr=0.01)
+    autoencoder = Model(input_img, decoded)
     autoencoder.compile(loss="binary_crossentropy", optimizer='adam', metrics=['accuracy'])
 
     # Read in data
@@ -93,11 +62,14 @@ def main():
     X /= 255
 
     # split into train and test data
-    X_train, X_test = X[:1900], X[1901:]
+    X_train, X_test = X[:1400], X[1401:]
 
     history_callback = autoencoder.fit(X_train, X_train, batch_size=128, epochs=100, verbose=1, validation_split=0.1)
+    
     # Load model
     #autoencoder = load_model('autoencoder_epochs_100.h5')
+    
+    # Make prediction
     decoded_imgs = autoencoder.predict(X_test)
 
     n = 10
@@ -120,7 +92,7 @@ def main():
 
     # Save model
     autoencoder.save('autoencoder_epochs_100.h5')
-    del autoencoder
+#    del autoencoder
 
     # Load model
     #model = load_model('models/autoencoder.h5')
